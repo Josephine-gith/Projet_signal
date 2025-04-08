@@ -2,18 +2,14 @@ import numpy as np
 import scipy.io.wavfile as wavfile
 from scipy.signal import resample
 from lpc import *
-import os
 
 if __name__ == '__main__':
-
-    if not os.path.exists('results'):
-        os.mkdir('results')
 
     # -------------------------------------------------------
     # 1: Normalize and resample the signal at 8kHz
     # -------------------------------------------------------
     
-    sampling_rate, speech = wavfile.read(os.path.join('audio','speech.wav'))
+    sampling_rate, speech = wavfile.read('./audio/speech.wav')
     
     # Normalization
     speech = np.array(speech)
@@ -26,7 +22,7 @@ if __name__ == '__main__':
     sampling_rate = target_sampling_rate
     
     # Save resampled signal
-    wavfile.write(os.path.join('results','speech_resampled.wav'), sampling_rate, speech)
+    wavfile.write("./results/speech_resampled.wav", sampling_rate, speech)
 
     # -------------------------------------------------------
     # 2: Block decomposition of the signal
@@ -39,7 +35,7 @@ if __name__ == '__main__':
     
     # Check if the reconstruction of the signal is correct
     rec = blocks_reconstruction(windowed_blocks, w, speech.size, R = 0.5) 
-    wavfile.write(os.path.join('results','block_reconstruction.wav'), sampling_rate, rec)
+    wavfile.write("./results/block_reconstruction.wav", sampling_rate, rec)   
      
     # -------------------------------------------------------
     # 3: Encodes the signal block by block
@@ -75,7 +71,7 @@ if __name__ == '__main__':
     decoded_speech = blocks_reconstruction(blocks_decoded, w, speech.size, 
       R = 0.5)
       
-    wavfile.write(os.path.join('results','decoded_speech.wav'), sampling_rate, decoded_speech)
+    wavfile.write("./results/decoded_speech.wav", sampling_rate, decoded_speech)
     
     # -------------------------------------------------------
     # 5: Decodes each block based upon white noise
@@ -92,8 +88,8 @@ if __name__ == '__main__':
     decoded_speech = blocks_reconstruction(blocks_decoded, w, speech.size, 
       R = 0.5)
       
-    wavfile.write(os.path.join('results','decoded_speech_noise.wav'),
-                  sampling_rate, decoded_speech)
+    wavfile.write("./results/decoded_speech_noise.wav", sampling_rate, 
+     decoded_speech)
     
     # -----------------------------------------------------------
     # 6: Decodes each block based upon the pitch (Bonus Question)
@@ -121,6 +117,5 @@ if __name__ == '__main__':
     decoded_speech = blocks_reconstruction(blocks_decoded, w, speech.size, 
       R = 0.5)
       
-    wavfile.write(os.path.join('results','decoded_speech_pitch.wav'),
-                  sampling_rate, decoded_speech)
-    
+    wavfile.write("./results/decoded_speech_pitch.wav", sampling_rate, 
+     decoded_speech)

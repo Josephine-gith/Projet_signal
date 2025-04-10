@@ -37,7 +37,8 @@ def blocks_decomposition(x, w, R=0.5):
 
     # Padding
     nperseg = len(w)
-    hop_length = nperseg - R
+    noverlap = int(R*len(w))
+    hop_length = nperseg - noverlap
     x_padded = np.pad(
         x, (nperseg // 2, nperseg // 2), "constant", constant_values=(0, 0)
     )
@@ -78,7 +79,8 @@ def blocks_reconstruction(blocks, w, signal_size, R=0.5):
       reconstructed signal
     """
     nperseg = w.size
-    hop_length = nperseg - R
+    noverlap = int(R*len(w))
+    hop_length = nperseg - noverlap
 
     reconstruction = np.zeros(signal_size + nperseg)
     norm = np.zeros_like(reconstruction)
@@ -136,7 +138,7 @@ def lpc_encode(x, p):
     Returns
     -------
 
-    out: tuple (coef, e, g)
+    out: tuple (coef, prediction)
       coefs: numpy array
         filter coefficients
       prediction: numpy array
@@ -144,16 +146,16 @@ def lpc_encode(x, p):
     """
     N = len(x)
     prediction = np.zeros(N)
-    e = np.zeros(N)
 
     rs0 = np.array([autocovariance(x, i) for i in range(p)])
     rs1 = np.array([autocovariance(x, i) for i in range(1, p + 1)])
     coef = solve_toeplitz(rs0, rs1)
 
-    for n in range(N):
-        prediction[n] = np.sum(coef * x[: n - p - 1 : -1])
-        e[n] = np.linalg.norm(x[n] - prediction[n])
-    return (coef, e, prediction)
+    for n in range(p):
+        prediction[n] = np.sum(coef[:n+1] * x[n:: -1])
+    for n in range(p,N):
+        prediction[n] = np.sum(coef * x[n:n-p: -1])
+    return (coef, prediction)
 
 
 def lpc_decode(coefs, source):
@@ -205,7 +207,7 @@ def estimate_pitch(signal, sample_rate, min_freq=50, max_freq=200, threshold=1):
     voiced: boolean
       Indicates if the signal is voiced (True) or not
     pitch: float
-      estimated pitch (in Hz)
+      estimated pitch (in s)
     """
 
     # A COMPLETER

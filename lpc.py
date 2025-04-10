@@ -37,7 +37,7 @@ def blocks_decomposition(x, w, R=0.5):
 
     # Padding
     nperseg = len(w)
-    noverlap = int(R*len(w))
+    noverlap = int(R * len(w))
     hop_length = nperseg - noverlap
     x_padded = np.pad(
         x, (nperseg // 2, nperseg // 2), "constant", constant_values=(0, 0)
@@ -79,7 +79,7 @@ def blocks_reconstruction(blocks, w, signal_size, R=0.5):
       reconstructed signal
     """
     nperseg = w.size
-    noverlap = int(R*len(w))
+    noverlap = int(R * len(w))
     hop_length = nperseg - noverlap
 
     reconstruction = np.zeros(signal_size + nperseg)
@@ -152,9 +152,9 @@ def lpc_encode(x, p):
     coef = solve_toeplitz(rs0, rs1)
 
     for n in range(p):
-        prediction[n] = np.sum(coef[:n+1] * x[n:: -1])
-    for n in range(p,N):
-        prediction[n] = np.sum(coef * x[n:n-p: -1])
+        prediction[n] = np.sum(coef[: n + 1] * x[n::-1])
+    for n in range(p, N):
+        prediction[n] = np.sum(coef * x[n : n - p : -1])
     return (coef, prediction)
 
 

@@ -12,7 +12,7 @@ if __name__ == "__main__":
     # 1: Normalize and resample the signal at 8kHz
     # -------------------------------------------------------
 
-    sampling_rate, speech = wavfile.read(os.path.join("audio", "speech.wav"))
+    sampling_rate, speech = wavfile.read(os.path.join("Projet_signal/audio", "speech.wav")) #on recupere le speech
 
     # Normalization
     speech = np.array(speech)
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     w = hann(floor(0.04 * sampling_rate), False)
 
-    blocks, windowed_blocks = blocks_decomposition(speech, w, R=0.5)
+    blocks, windowed_blocks = blocks_decomposition(speech, w, R=0.5)#on decompose le speech en blocks
     n_blocks, block_size = blocks.shape
 
     # Check if the reconstruction of the signal is correct
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     for block, windowed_block in zip(blocks, windowed_blocks):
         coefs, prediction = lpc_encode(windowed_block, p)
         residual = windowed_block - prediction
-        voiced, pitch = estimate_pitch(block, sampling_rate, threshold=1)
+        #voiced, pitch = estimate_pitch(block, sampling_rate, threshold=1)
 
         blocks_encoding.append(
             {
@@ -62,8 +62,8 @@ if __name__ == "__main__":
                 "residual": residual,
                 "size": block.size,
                 "gain": np.std(residual),
-                "pitch": pitch,
-                "voiced": voiced,
+                # "pitch": pitch,
+                # "voiced": voiced,
             }
         )
 

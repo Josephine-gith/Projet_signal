@@ -119,7 +119,13 @@ def autocovariance(x, k):
         r += x[i] * x[i + k]
     return r / N
 
-
+def prediction(a_predire, coef, N,p) :
+    for n in range(N) :
+        for k in range(p) :
+            if n-k>=0 and n<p:
+                a_predire[n]+=coef[k]*a_predire[n-k]
+    return a_predire
+    
 def lpc_encode(x, p):
     """
     Linear predictive coding
@@ -145,19 +151,22 @@ def lpc_encode(x, p):
         lpc prediction
     """
     N = len(x)
-    prediction = np.zeros(N)
+    a_predire = np.zeros(N)
 
     rs0 = np.array([autocovariance(x, i) for i in range(p)])
     rs1 = np.array([autocovariance(x, i) for i in range(1, p + 1)])
     coef = solve_toeplitz(rs0, rs1)
+    
+    return (coef, prediction(a_predire,coef,N,p))
 
-    for n in range(p):
-        prediction[n] = np.sum(coef[: n + 1] * x[n::-1])
-    for n in range(p, N):
-        prediction[n] = np.sum(coef * x[n : n - p : -1])
-    return (coef, prediction)
-
-
+def signal(a_reconstruire, coefs, window, source ,N,p) :
+    for n in range(N) :
+      for k in range(p) :
+          if n-k>= 0 and n<p :
+              a_reconstruire[n]+= coefs[n]*a_reconstruire[n-k]
+      a_reconstruire[n]+=window[n]*source[n]
+    return a_reconstruire
+    
 def lpc_decode(coefs, source):
     """
     Synthesizes a speech segment using the LPC filter and an excitation source
@@ -178,8 +187,20 @@ def lpc_decode(coefs, source):
       synthesized segment
     """
 
-    # A COMPLETER
-    return 0
+    N=len(source)
+    p=len(coefs)
+    a_reconstruire=np.zeros(N)
+
+    window = hann(20*24)
+
+
+    # for n in range(1,p) :
+    #     signal[n]=window[n]*source[n] + np.sum(coefs[:n]*signal[n-1::-1])
+
+    # for n in range(p,N) :
+    #     signal[n]=window[n]*source[n] + np.sum(coefs*signal[n-1:n-p-1:-1])
+        
+    return signal(a_reconstruire,coefs,window,source,N,p)
 
 
 def estimate_pitch(signal, sample_rate, min_freq=50, max_freq=200, threshold=1):
